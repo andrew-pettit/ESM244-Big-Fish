@@ -1,5 +1,6 @@
 library(shiny)
 library(tidyverse)
+library(bslib)
 gsb_fidelity<-read_csv("gsb_fidelity.csv")
 gsb_fidelity <- gsb_fidelity %>%
   mutate(group_locations = case_when(location_id %in% c("Catalina Island- Casino Point", "Catalina Island- Eagle Reef", "Catalina Island- Italian Gardens", "Catalina Island- Goat Harbor", "Catalina Island- Rock Quarry",
@@ -17,17 +18,17 @@ my_theme <- bs_theme(
 )
 ui <- fluidPage(theme = my_theme,
                 navbarPage(
-                  "Name",
+                  "Spotting Giant Sea Bass",
                   tabPanel("Map",
                            sidebarLayout(
-                             sidebarPanel("Widgets",
+                             sidebarPanel(tags$img(src = 'GSB187.png', height = 300, width = 430),
                                           radioButtons(
                                             inputId = "pick_GSB",
                                             label = 'Choose a GSB!',
                                             choices = c("GSB 187","GSB 226","GSB 168","GSB 307","GSB 346")
                                           )
                              ),
-                             mainPanel("Output!")
+                             mainPanel("Map")
                            )#end Sidebarlayout 1
                   ),#endMaptabPanel
                   tabPanel("Figures",
@@ -52,7 +53,17 @@ ui <- fluidPage(theme = my_theme,
                                        plotOutput("gsb_fidelity_plot"))
                            ) #end sidebarlayoutFigurestab
                   ), #end tabpanel figures tab
-                  tabPanel("Thing 3")
+                  tabPanel("Project Summary",
+                           sidebarLayout(
+                             sidebarPanel(
+                               tags$img(src = 'Matching_example.png', height = 250, width = 500),
+                             ),
+                  mainPanel(
+                        h6("Data Summary", align = "center"), 
+                        p("Data is collected from the Spotting Giant Sea Bass project, a collaborative community science project created in 2016 where divers upload their photos of giant sea bass for researchers to identify individuals via machine learning. Giant sea bass have unique spot patterns - like a fingerprint - allowing for researchers to identity individual giant sea bass through highly accurate pattern recognition software. Once the researcher has identified the spots along the giant sea bass’ side, the software compares spot patterns of previously identified individuals and provides a ranked list of possible matches for the researcher to determine if there is a spot pattern match. If the researcher determines that we have not seen this individual, this giant sea bass is marked as a new individual and given a name. We currently have 340 verified unique individuals out of 545 observations.") 
+                  ) #ending mainPanel
+                  ) #ending sidebarLayout
+                  ) #ending tabPanel
                 ) #end navbarPage
 ) #end fluidPage
 server <- function(input, output) {
@@ -73,6 +84,7 @@ server <- function(input, output) {
              theme_minimal()
     ))
 }
+
 shinyApp(ui = ui, server = server)
 
 
