@@ -1,7 +1,9 @@
 library(shiny)
 library(tidyverse)
 library(bslib)
-gsb_fidelity<-read_csv("gsb_fidelity.csv")
+library(here)
+
+gsb_fidelity<-read_csv(here("ESM-244-Final-Project", "GSB_fidelity.csv"))
 gsb_fidelity <- gsb_fidelity %>%
   mutate(group_locations = case_when(location_id %in% c("Catalina Island- Casino Point", "Catalina Island- Eagle Reef", "Catalina Island- Italian Gardens", "Catalina Island- Goat Harbor", "Catalina Island- Rock Quarry",
                                                         "Catalina Island- Twin Rocks", "Catalina Island- frontside", "Catalina Island- Big Fisherman's Cove", "Catalina Island", "Catalina Island- Little Farnsworth", "Catalina Island- Isthmus Cove") ~ "Catalina Island",
