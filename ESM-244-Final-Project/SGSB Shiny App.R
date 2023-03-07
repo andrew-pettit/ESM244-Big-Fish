@@ -7,6 +7,11 @@ gsb_fidelity<-read_csv(here("ESM-244-Final-Project", "GSB_fidelity.csv"))
 gsb_island_sums<- gsb_fidelity %>%
   group_by(year_collected) %>%
   count(group_locations)
+
+gsb_top5 <- gsb_fidelity %>%
+  filter(marked_individual == "GSB136" | marked_individual == "GSB187" | marked_individual == "GSB023" | marked_individual == "GSB244" | marked_individual == "GSB359")
+
+
 ui <- dashboardPage(skin = "blue",
                     dashboardHeader(title = "Spotting Giant Sea Bass", titleWidth = 250),
                     dashboardSidebar(width = 250,
