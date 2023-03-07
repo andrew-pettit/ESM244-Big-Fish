@@ -3,6 +3,8 @@ library(shinydashboard)
 library(tidyverse)
 library(here)
 library(lubridate)
+library(leaflet)
+
 gsb_fidelity<-read_csv(here("ESM-244-Final-Project", "GSB_fidelity.csv"))
 gsb_island_sums<- gsb_fidelity %>%
   group_by(year_collected) %>%
