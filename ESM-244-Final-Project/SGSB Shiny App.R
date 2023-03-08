@@ -17,11 +17,19 @@ gsb_top5 <- gsb_fidelity %>%
 ui <- dashboardPage(skin = "blue",
                     dashboardHeader(title = "Spotting Giant Sea Bass", titleWidth = 250),
                     dashboardSidebar(width = 250,
+                                     sidebarMenu(
+                                     menuItem("Project Background", tabName = "background", icon = icon("sailboat")),
                                      menuItem("GSB Map", tabName = "GSBmap", icon = icon("map-marker")),
-                                     menuItem("Figures", tabName = "figures", icon = icon("fish-fins")),
-                                     menuItem("Project Background", tabName = "background", icon = icon("sailboat"))),
+                                     menuItem("Figures", tabName = "figures", icon = icon("fish-fins")))),
                     dashboardBody(
                       tabItems(
+                        tabItem("background",
+                                h1("Project Background"),
+                                box(h6("Data Summary", align = "center"),
+                                    p("Data is collected from the Spotting Giant Sea Bass project, a collaborative community science project created in 2016 where divers upload their photos of giant sea bass for researchers to identify individuals via machine learning. Giant sea bass have unique spot patterns - like a fingerprint - allowing for researchers to identity individual giant sea bass through highly accurate pattern recognition software. Once the researcher has identified the spots along the giant sea bass’ side, the software compares spot patterns of previously identified individuals and provides a ranked list of possible matches for the researcher to determine if there is a spot pattern match. If the researcher determines that we have not seen this individual, this giant sea bass is marked as a new individual and given a name. We currently have 340 verified unique individuals out of 545 observations.")),
+                                box(h6("Matching Example", align = "center"),
+                                    imageOutput("match_img"))
+                        ),
                         tabItem("GSBmap",
                                 h1("Hey Cute bass!"),
                                 box(
@@ -65,21 +73,22 @@ ui <- dashboardPage(skin = "blue",
                                                        selected = 'Northern Channel Islands'),
                                     plotOutput("island_plot")
                                   )
-                                )),
-                        tabItem("background",
-                                h1("Project Background"),
-                                box(h6("Data Summary", align = "center"),
-                                    p("Data is collected from the Spotting Giant Sea Bass project, a collaborative community science project created in 2016 where divers upload their photos of giant sea bass for researchers to identify individuals via machine learning. Giant sea bass have unique spot patterns - like a fingerprint - allowing for researchers to identity individual giant sea bass through highly accurate pattern recognition software. Once the researcher has identified the spots along the giant sea bass’ side, the software compares spot patterns of previously identified individuals and provides a ranked list of possible matches for the researcher to determine if there is a spot pattern match. If the researcher determines that we have not seen this individual, this giant sea bass is marked as a new individual and given a name. We currently have 340 verified unique individuals out of 545 observations.")),
-                                box(h6("Matching Example", align = "center"),
-                                    imageOutput("match_img"))
+                                
                         )
                       )
                     )
+                    )
 )
+
 server<- function(input, output){
   fidelity_reactive <- reactive({ gsb_fidelity %>%
       filter(between(year_collected,input$ob_year[1],input$ob_year[2]))
   })
+  
+  map_reactive <- reactive({gsb_top5 %>%
+      filter(marked_individual %in% input$pick_GSB)
+  })
+  
   #end fidelity reactive
   output$fidelity_plot <- renderPlot(
     ggplot(data = fidelity_reactive())+
@@ -115,17 +124,18 @@ server<- function(input, output){
   )
   
   output$gsb_map <- renderLeaflet({
-    leaflet(gsb_top5) %>%
+    leaflet(map_reactive()) %>%
       addProviderTiles(providers$Stamen.Terrain) %>%
       setView(-118.737930, 33.569371, zoom = 8) %>%
-      addMarkers(lng = ~latitude, lat=~longitude, popup = ~gsb_top5$marked_individual)
+      #addMarkers(data = map_reactive(), lng = ~latitude, lat=~longitude, popup = marked_individual)
+      addMarkers(lng = ~latitude, lat=~longitude, popup = input$gsb_map)
   })
   
   output$match_img <- renderImage({
     
     list(src = "www/Matching_example.png",
          width = "100%",
-         height = 220)
+         height = 300)
     
   }, deleteFile = F)
   
