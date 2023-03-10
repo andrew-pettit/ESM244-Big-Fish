@@ -5,7 +5,6 @@ library(here)
 library(leaflet)
 
 gsb_fidelity<-read_csv(here("ESM-244-Final-Project", "GSB_fidelity.csv"))
-gsb_fidelity$longitude <- as.numeric(gsb_fidelity$longitude)
 gsb_fidelity$latitude <- as.numeric(gsb_fidelity$latitude)
 
 gsb_top5 <- gsb_coords %>%
