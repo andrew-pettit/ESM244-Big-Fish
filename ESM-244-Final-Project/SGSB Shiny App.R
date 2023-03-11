@@ -44,7 +44,6 @@ ui <- dashboardPage(skin = "blue",
                                 box(h6("Matching Example", align = "center"),
                                     imageOutput("match_img"))),
                                 
-                                   
                         tabItem("GSBmap",
                                 h1("Hey Cute bass!"),
                                 box(
@@ -106,13 +105,13 @@ ui <- dashboardPage(skin = "blue",
                                                        choices = unique(gsb_fidelity$group_locations),
                                                        selected = 'Northern Channel Islands'),
                                     plotOutput("island_plot")
-                                  )
+                                  ) # end box
                                   
-                                )
-                        )
-                      )
-                    )
-)
+                                ) # end fluidRow
+                        ) # end tabItem
+                      ) #end tabItems
+                    ) # end dashboard body
+) #end dashboard pages
 
 server<- function(input, output){
   fidelity_reactive <- reactive({ gsb_fidelity_lubridate %>%
@@ -121,25 +120,28 @@ server<- function(input, output){
   
   map_reactive <- reactive({gsb_top5 %>%
       filter(marked_individual %in% input$pick_GSB)
+  }) #end fidelity reactive
+  
+    map_reactive <- reactive({gsb_top5 %>%
+      filter(marked_individual %in% input$pick_GSB)
   })
   
-  #end fidelity reactive
   output$fidelity_plot <- renderPlot(
     ggplot(data = fidelity_reactive())+
-      geom_histogram(aes(x=year_final, fill=status))+
+      geom_histogram(aes(x=year_collected, fill=status))+
       labs(
         x="Year",
         y="GSB Encounters"
       )  +
       scale_fill_manual("Status", values = fidelity_vec) +
-      theme_min
+      theme_light()
   ) #end output$fidelity_plot
-  
+
   reef_reactive <- reactive({
     gsb_fidelity %>%
       filter(status %in% input$reef_type)
   }) #end reef_reactive
-  
+
   output$reef_plot <- renderPlot(
     ggplot(data=reef_reactive())+
       geom_bar(aes(x = fidelity, fill = status)) +
@@ -154,7 +156,7 @@ server<- function(input, output){
             panel.grid.major.y = element_line(size = .1, color = "grey"),
             panel.grid.minor.y = element_line(size = .1, color = "grey"))
   ) #end output$reef_plot
-  
+
   island_reactive<- reactive({
     gsb_island_sums %>%
       filter(group_locations %in% input$island_id)
@@ -170,7 +172,7 @@ server<- function(input, output){
         y = "Number of Sightings",
         title = "Number of Sightings by Location") +
       theme_light()
-  )
+    ) # end output$island_plot
   
   output$gsb_map <- renderLeaflet({
     leaflet(map_reactive()) %>%
@@ -196,6 +198,9 @@ server<- function(input, output){
     
   }, deleteFile = F)
   
-}
+
+
+} 
+
 shinyApp(ui, server)
 
