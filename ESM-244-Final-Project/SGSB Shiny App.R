@@ -117,7 +117,13 @@ ui <- dashboardPage(skin = "blue",
                                     plotOutput("island_plot")
                                   ) # end box
                                   
-                                ) # end fluidRow
+                                ), # end fluidRow
+                                box(h6("Marine Protected Areas in Study Site", align = "center"),
+                                imageOutput("MPA_img"), 
+                                p("Map of Marine Protected Areas (MPAs) in the Southern California Bight. 
+                                  
+                                  [CITATION]")
+                                ) #end box
                         ) # end tabItem
                       ) #end tabItems
                     ) # end dashboard body
@@ -220,6 +226,13 @@ output$gsb_map_all <- renderLeaflet({
     
   }, deleteFile = F)
   
+output$MPA_img <- renderImage({
+    
+    list(src = "www/MPA_map.jpeg",
+         width = "100%",
+         height = 320)
+    
+  }, deleteFile = F)
   
   
 } 
