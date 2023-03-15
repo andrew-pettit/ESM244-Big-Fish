@@ -45,9 +45,12 @@ ui <- dashboardPage(skin = "blue",
                                 box(h6("Matching Example", align = "center"),
                                     imageOutput("match_img"), 
                                     p("Once the photos and videos are uploaded to the project website (https://spottinggiantseabass.msi.ucsb.edu) with detailed information about the encounter (date, location, behavior, depth, etc.), researchers will then “spot map” the giant sea bass’s spot pattern. To do this, researchers manually mark each visible spot on the side of the fish and then run the algorithm, which is essentially a facial recognition software for giant sea bass. (Fun fact: this algorithm was originally developed by astrophysicists to identify patterns in star constellations and was later used by NASA with the Hubble telescope!) The algorithm provides a ranked selection of possible giant sea bass matches, and the research team decides if the spot pattern matches with a previously identified individual. If there is no match, the giant sea bass is marked as a new individual and the diver who submitted the image will be notified and given the opportunity to give the fish a nickname! This data helps researchers have a better understand of how giant sea bass move throughout their natural range, how large the population is, and how effective marine protected areas are in helping preserve this magnificent species. 
-"))),
-                        
-                        
+")), #end matching example caption
+                                box(h6("Map of all Encounters", align = "center"),
+                                    leafletOutput("gsb_map_all"), 
+                                  p("All giant sea bass encounters submitted from 2004 - 2022.")
+                                )),
+                      
                         tabItem("GSBmap",
                                 h1("Hey Cute bass!"),
                                 box(
@@ -192,7 +195,14 @@ server<- function(input, output){
       setView(-118.737930, 33.569371, zoom = 8) %>%
       #addMarkers(data = map_reactive(), lng = ~latitude, lat=~longitude, popup = marked_individual)
       addMarkers(lng = ~latitude, lat=~longitude, popup = input$gsb_map)
-  })
+  }) # end reactive leaflet map 
+  
+output$gsb_map_all <- renderLeaflet({
+    leaflet(gsb_fidelity) %>%
+      addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
+      setView(-118.737930, 33.569371, zoom = 8) %>%
+      addMarkers(data = gsb_fidelity, lng = ~latitude, lat=~longitude, popup = gsb_fidelity$marked_individual)
+  }) # end leaflet map 
   
   output$match_img <- renderImage({
     
