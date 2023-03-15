@@ -4,6 +4,7 @@ library(tidyverse)
 library(here)
 library(lubridate)
 library(leaflet)
+library(scales)
 
 gsb_fidelity<-read_csv(here("ESM-244-Final-Project", "GSB_fidelity.csv"))
 
@@ -40,9 +41,11 @@ ui <- dashboardPage(skin = "blue",
                                 box(h6("Data Summary", align = "center"),
                                     p("Data is collected from the Spotting Giant Sea Bass project, a collaborative community science project created in 2016 where divers upload their photos of giant sea bass for researchers to identify individuals via machine learning. Giant sea bass have unique spot patterns - like a fingerprint - allowing for researchers to identity individual giant sea bass through highly accurate pattern recognition software. Once the researcher has identified the spots along the giant sea bass’ side, the software compares spot patterns of previously identified individuals and provides a ranked list of possible matches for the researcher to determine if there is a spot pattern match. If the researcher determines that we have not seen this individual, this giant sea bass is marked as a new individual and given a name. We currently have 340 verified unique individuals out of 545 observations."),
                                     h6("Our Coding Team", align = "center"),
-                                    p("Charlie Braman, Lauren Enright, and Andrew Pettit wrangled and designed this Shiny App. Big thank you to Andrew for having such a cool dataset for us to work with.")),
+                                    p("Charlie Braman, Lauren Enright, and Andrew Pettit wrangled the data and designed this Shiny App. Big thank you to Andrew for having such a cool dataset for us to work with.")),
                                 box(h6("Matching Example", align = "center"),
-                                    imageOutput("match_img"))),
+                                    imageOutput("match_img"), 
+                                    p("Once the photos and videos are uploaded to the project website (https://spottinggiantseabass.msi.ucsb.edu) with detailed information about the encounter (date, location, behavior, depth, etc.), researchers will then “spot map” the giant sea bass’s spot pattern. To do this, researchers manually mark each visible spot on the side of the fish and then run the algorithm, which is essentially a facial recognition software for giant sea bass. (Fun fact: this algorithm was originally developed by astrophysicists to identify patterns in star constellations and was later used by NASA with the Hubble telescope!) The algorithm provides a ranked selection of possible giant sea bass matches, and the research team decides if the spot pattern matches with a previously identified individual. If there is no match, the giant sea bass is marked as a new individual and the diver who submitted the image will be notified and given the opportunity to give the fish a nickname! This data helps researchers have a better understand of how giant sea bass move throughout their natural range, how large the population is, and how effective marine protected areas are in helping preserve this magnificent species. 
+"))),
                         
                         
                         tabItem("GSBmap",
@@ -50,59 +53,62 @@ ui <- dashboardPage(skin = "blue",
                                 box(
                                   leafletOutput("gsb_map"), 
                                   br(),
-                                  "Follow along with some of our most frequently sighted Giant Sea Bass.
-                                  Choose one of our unique basses (GSB 187 is our favorite) and see all the locations
-                                  that it has been spotted.",
+                                  "Follow along with our most frequently sighted giant sea bass.
+                                  Choose one of our unique individuals (GSB 187 is our favorite) and see all the locations
+                                  where each individual has been encountered",
                                   radioButtons(
                                     inputId = "pick_GSB",
-                                    label = 'Choose a GSB!',
+                                    label = 'Choose a GSB',
                                     choices = c("GSB187","GSB136","GSB023","GSB244","GSB359"))),
-                                box(h6("GSB187", align = "center"),
-                                    imageOutput("gsb187_img"))
+                                box(h6("GSB187 at Cathedral Point, Anacapa Island in September, 2018. Photo by Douglas Klug", align = "center"),
+                                    imageOutput("gsb187_img"), 
+                                    p("GSB187 has been observed 11 times in 6 different dive sites all over Anacapa Island! GSB187 was first spotted in June, 2015 at Cathedral Cove at Anacapa Island and was last seen in July, 2021 at the northwest side of Anacapa Island. Having data on where individual giant sea bass were encountered over the years is crucial in better understanding their life history and spatial patterns."))
                         ),
                         tabItem("figures",
                                 h1("Figures"),
                                 fluidRow(
                                   box(
-                                    title = "Site Fidelity",
+                                    title = "Annual Observations by Site Status",
                                     solidHeader = TRUE,
                                     br(),
-                                    "Choose a range of observations years! This figure will illustrate the number of
-                                    Giant Sea Bass encounters for each year, by site status. Site Status included protected
-                                    (like an MPA), non-protected, or unknown.",
+                                    "Choose a date range to see the number of giant sea bass encounters that were recorded within protected and non-preotected areas. Protected areas are dive sites within a Marine Protected Area (MPA). Non-protected sites are areas that are outside MPAs. Unknown protected status are giant sea bass encounters whre the diver provided too broad of a location to determine the protected status of the where the giant sea bass was encountered (ex. a reported location of “Channel Islands”). 
+",
                                     br(),
                                     br(),
-                                    sliderInput("Observation Years",
+                                    sliderInput("Choose Observation Year Range",
                                                 inputId = 'ob_year',
                                                 2004,2022,
-                                                value = c(2005,2010),
+                                                value = c(2016,2022),
                                                 sep = ""),
                                     plotOutput("fidelity_plot")
                                   ),
-                                  box(title = "Reef Status",
+                                  box(title = "Site Fidelity by Site Status",
                                       solidHeader = TRUE,
                                       br(),
-                                      "This figure shows the number of unique individuals in each fidelity level, by site status.
-                                      High Fidelity means X amount of returns, medium fidelity means y amounts of returns, and low fidelity means z amount of
-                                      returns. Protected sites include marine protected areas (like MPAs).",
+                                      "Compare the number of unique individuals encountered and site fidelity sites amongst  protected and non-protected sites. 
+                                      Site fidelity is defined as the tendency of a giant sea bass individual to return to a previously visited location. 
+                                      A giant sea bass with high site fidelity represents and individual that has been encountered in only one site over the course of the study. 
+                                      Medium site fidelity is when a giant sea bass has been sighted in up to three locations, and low site fidelity is given to giant sea bass individuals who has been encountered in four or more locations over the course of the study. 
+                                      Only giant sea bass individuals who have been encountered at least two times are incorporated in this figure. Protected status refers to encounters in dives sites within an MPA and non-protected status refers to sites outside of MPAs. 
+                                      Unknown status is designated to giant sea bass individuals that been encountered in an unspecified location making it impossible to determine the protected staus of the giant sea bass encounter.
+                                      Since our project was created in 2016, we do not have much data before then.",
                                       br(),
                                       br(),
                                       checkboxGroupInput(inputId = "reef_type",
-                                                         label = 'GSB Reef Type!',
+                                                         label = 'Select Site Status',
                                                          choices = unique(gsb_fidelity$status),
                                                          selected = 'Protected'),
                                       plotOutput("reef_plot"))),
                                 fluidRow(
                                   box(
-                                    title = 'Sitings By Location',
+                                    title = 'Annual Encounters By Location',
                                     solidHeader = TRUE,
                                     br(),
-                                    "This figure demonstrates the number of Giant Sea Bass (GSB) sightings by location!
-                                    Maybe add a sentence about how the earliest sightings were on Catalina Island?",
+                                    "Compare the four main areas where giant sea bass have been encountered to see the number of encounters divers have submitted over the years. Even though the project was created in 2016, community scientists graciously uploaded giant sea bass encounters dating back to 2004. Our earlistest encounter was at Italian Gardens, Catalina on May 28th, 2004. Los Angleles refers to coastal dive sites from Malibu to Long Beach and San Diego refers to coastal dive sites from San Clemente to the Mexican border.",
                                     br(),
                                     br(),
                                     checkboxGroupInput(inputId = "island_id",
-                                                       label = 'Pick a location!',
+                                                       label = 'Pick a Location',
                                                        choices = unique(gsb_fidelity$group_locations),
                                                        selected = 'Northern Channel Islands'),
                                     plotOutput("island_plot")
@@ -129,13 +135,19 @@ server<- function(input, output){
   
   output$fidelity_plot <- renderPlot(
     ggplot(data = fidelity_reactive())+
-      geom_histogram(aes(x=year_collected, fill=status))+
+      geom_bar(aes(x=year_collected, fill = status))+
       labs(
         x="Year",
         y="GSB Encounters"
       )  +
       scale_fill_manual("Status", values = fidelity_vec) +
-      theme_light()
+      scale_x_continuous(breaks = seq(input$ob_year[1],input$ob_year[2], by = 1)) +
+      theme_light() +
+      theme(panel.grid.major.x = element_line(size = .1, color = "grey"),
+            panel.grid.minor.x = element_blank(),
+            panel.grid.major.y = element_line(size = .1, color = "grey"),
+            panel.grid.minor.y = element_line(size = .1, color = "grey"),
+            axis.text.x = element_text(size = 7, angle = 25, hjust = 1))
   ) #end output$fidelity_plot
   
   reef_reactive <- reactive({
@@ -149,9 +161,7 @@ server<- function(input, output){
       scale_fill_manual("Status", values = reefstatus_vec) +
       labs(
         x = "Fidelity Level",
-        y = "Number of Unique Individuals",
-        title = "Location Fidelity By Site Status"
-      ) +
+        y = "Number of Unique Individuals") +
       theme_light() +
       theme(panel.grid.major.x = element_blank(),
             panel.grid.major.y = element_line(size = .1, color = "grey"),
@@ -168,6 +178,7 @@ server<- function(input, output){
       geom_point(aes(x=year_collected, y=n, color=group_locations))+
       geom_path(aes(x=year_collected, y=n, color=group_locations)) +
       scale_color_manual("Locations", values = location_vec) +
+      scale_y_continuous(breaks = pretty_breaks()) +
       labs(
         x = "Year",
         y = "Number of Sightings",
@@ -177,7 +188,7 @@ server<- function(input, output){
   
   output$gsb_map <- renderLeaflet({
     leaflet(map_reactive()) %>%
-      addProviderTiles(providers$Stamen.Terrain) %>%
+      addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
       setView(-118.737930, 33.569371, zoom = 8) %>%
       #addMarkers(data = map_reactive(), lng = ~latitude, lat=~longitude, popup = marked_individual)
       addMarkers(lng = ~latitude, lat=~longitude, popup = input$gsb_map)
@@ -187,7 +198,7 @@ server<- function(input, output){
     
     list(src = "www/Matching_example.png",
          width = "100%",
-         height = 300)
+         height = 310)
     
   }, deleteFile = F)
   
@@ -195,7 +206,7 @@ server<- function(input, output){
     
     list(src = "www/GSB187.png",
          width = "100%",
-         height = 330)
+         height = 320)
     
   }, deleteFile = F)
   
